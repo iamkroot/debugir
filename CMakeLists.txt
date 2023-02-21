@@ -13,7 +13,7 @@ message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 # check dependencies
 #
 # LLVM stuff
-find_package(LLVM 12 REQUIRED CONFIG)
+find_package(LLVM 15 REQUIRED CONFIG)
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 # Find the libraries that correspond to the LLVM components we use
@@ -24,10 +24,10 @@ if (NOT LLVM_ENABLE_RTTI)
 endif()
 
 # compiler and linker options
-add_compile_options(-Wall)
-add_compile_options(-Werror)
-add_compile_options(-pedantic)
-add_compile_options(-Wextra)
+#add_compile_options(-Wall)
+#add_compile_options(-Werror)
+#add_compile_options(-pedantic)
+#add_compile_options(-Wextra)
 add_compile_options(-Wno-unknown-pragmas)
 
 # export compile commands

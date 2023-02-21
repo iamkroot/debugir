@@ -18,12 +18,16 @@
 #include <cstdlib>
 #include <iostream>
 
-#include "llvm/IR/LegacyPassManager.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IRReader/IRReader.h"
 #include "llvm/Support/CommandLine.h"
+#include "llvm/Support/Error.h"
+#include "llvm/Support/Path.h"
+#include "llvm/Support/SourceMgr.h"
+#include "llvm/Support/FileSystem.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Transforms/Utils.h"
+#include "llvm/Transforms/Utils/InstructionNamer.h"
 
 #include "DebugIR.h"
 
@@ -68,21 +72,22 @@ int main(int argc, char *argv[]) {
   }
 
   if (RunInstNamer) {
-
-    auto PM = llvm::legacy::PassManager();
-    PM.add((llvm::createInstructionNamerPass()));
-    PM.run(*M);
+    llvm::InstructionNamerPass pp{};
+    llvm::FunctionAnalysisManager fam{};
+    for (auto &&func: *M) {
+      pp.run(func, fam);
+    }
   }
 
   auto DisplayM = createDebugInfo(*M.get(), Directory.str(), Filename.str());
   std::error_code EC;
 
   // Update InputFile in-place so that line numbers match with DebugFile.
-  raw_fd_ostream OS_disp(InputFile, EC, sys::fs::F_Text);
+  raw_fd_ostream OS_disp(InputFile, EC, sys::fs::OF_Text);
   DisplayM->print(OS_disp, nullptr);
 
   // Output the display file
-  raw_fd_ostream OS_dbg(DebugFile, EC, sys::fs::F_Text);
+  raw_fd_ostream OS_dbg(DebugFile, EC, sys::fs::OF_Text);
   M->print(OS_dbg, nullptr);
 
   return EXIT_SUCCESS;
