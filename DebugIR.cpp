@@ -440,12 +440,13 @@ private:
 
       Builder.replaceArrays(S, Builder.getOrCreateArray(Elements));
     } else if (T->isPointerTy()) {
-      Type *PointeeTy = T->getPointerElementType();
-      if (!(N = getType(PointeeTy)))
-        N = Builder.createPointerType(
-            getOrCreateType(PointeeTy), Layout.getPointerTypeSizeInBits(T),
-            Layout.getPrefTypeAlignment(T), /*DWARFAddressSpace=*/None,
-            getTypeName(T));
+      // FIXME: How to make this work with opaque pointers?
+      // Type *PointeeTy = T->getPointerElementType();
+      // if (!(N = getType(PointeeTy)))
+      //   N = Builder.createPointerType(
+      //       getOrCreateType(PointeeTy), Layout.getPointerTypeSizeInBits(T),
+      //       Layout.getPrefTypeAlignment(T), /*DWARFAddressSpace=*/None,
+      //       getTypeName(T));
     } else if (T->isArrayTy()) {
       SmallVector<Metadata *, 4>
           Subscripts; // unfortunately, SmallVector<Type *> does not decay to
@@ -502,6 +503,8 @@ std::unique_ptr<Module> createDebugInfo(Module &M, std::string Directory,
   auto VMap = std::make_unique<ValueToValueMapTy>();
   auto DisplayM = CloneModule(M, *VMap);
   StripDebugInfo(*(DisplayM.get()));
+  // DisplayM->getContext().setOpaquePointers(false);
+  //       llvm::dbgs() <<  " opq: " << DisplayM->getContext().hasSetOpaquePointersValue() <<"\n";
 
   {
     // DIUpdater is in its own scope so that it's destructor, and hence
