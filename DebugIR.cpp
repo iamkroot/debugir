@@ -441,12 +441,14 @@ private:
       Builder.replaceArrays(S, Builder.getOrCreateArray(Elements));
     } else if (T->isPointerTy()) {
       // FIXME: How to make this work with opaque pointers?
-      // Type *PointeeTy = T->getPointerElementType();
-      // if (!(N = getType(PointeeTy)))
-      //   N = Builder.createPointerType(
-      //       getOrCreateType(PointeeTy), Layout.getPointerTypeSizeInBits(T),
-      //       Layout.getPrefTypeAlignment(T), /*DWARFAddressSpace=*/None,
-      //       getTypeName(T));
+      if (!T->isOpaquePointerTy()) {
+        Type *PointeeTy = T->getPointerElementType();
+        if (!(N = getType(PointeeTy)))
+          N = Builder.createPointerType(
+              getOrCreateType(PointeeTy), Layout.getPointerTypeSizeInBits(T),
+              Layout.getPrefTypeAlignment(T), /*DWARFAddressSpace=*/None,
+              getTypeName(T));
+      }
     } else if (T->isArrayTy()) {
       SmallVector<Metadata *, 4>
           Subscripts; // unfortunately, SmallVector<Type *> does not decay to
